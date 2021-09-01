@@ -45,7 +45,7 @@ const BookList = () => {
     const booksFiltered = books?.filter(
       (book) =>
         isValueStartsWith(book?.title, filter) ||
-        isValueStartsWith(book?.id, filter)
+        book?.id== filter
     );
     return booksFiltered;
   };
