@@ -2,10 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { Row, Col, Card, CardBody } from "reactstrap";
 import BookTable from "./BookTable";
-import {
-  getBooks,
-  deleteBooks,
-} from "../../services/books/booksService";
+import { getBooks, deleteBooks } from "../../services/books/booksService";
 import InputSearch from "./../commons/Inputs/InputSearch";
 import { useHistory, useParams } from "react-router-dom";
 import { ButtonAdd } from "../commons/Button";
@@ -19,64 +16,47 @@ import {
 } from "./../../utils/utilityMessageDialogFunctions";
 
 const BookList = () => {
-
-
-
-
   const initalState = {
     filter: "",
     books: [],
     filteredBooks: [],
   };
 
+  const { state: booksData, setState: setBooksData } = useForm(initalState);
 
-  const { state: booksData, setState: setBooksData } =
-  useForm(initalState);
+  const { filter, books, filteredBooks } = booksData;
 
-const { filter, books, filteredBooks } = booksData;
+  const handleChangeInput = ({ currentTarget: input }) => {
+    setBooksData((data) => ({ ...data, filter: input.value }));
+    handleSearchBook(input.value);
+  };
 
+  const handleSearchBook = (filter = "") => {
+    const booksFiltered = filterBooks(filter, books);
+    setBooksData((data) => ({
+      ...data,
+      filteredBooks: booksFiltered,
+    }));
+  };
 
-
-
-  
-    const handleChangeInput = ({ currentTarget: input }) => {
-      setBooksData((data) => ({ ...data, filter: input.value }));
-      handleSearchBook(input.value);
-    };
-  
-  
-    const handleSearchBook = (filter = "") => {
-      const booksFiltered = filterBooks(filter, books);
-      setBooksData((data) => ({
-        ...data,
-        filteredBooks: booksFiltered,
-      }));
-    };
-  
- 
   const history = useHistory();
 
   const filterBooks = (filter, books = []) => {
     const booksFiltered = books?.filter(
       (book) =>
-        isValueStartsWith(book?.name, filter) ||
-        isValueStartsWith(book?.phone, filter)
+        isValueStartsWith(book?.title, filter) ||
+        isValueStartsWith(book?.id, filter)
     );
     return booksFiltered;
   };
 
-
-
-  
   const handleEditBook = ({ id }) => {
     history.push("books/" + id);
   };
- 
-  const handleAddBook  = ({ id }) => {
+
+  const handleAddBook = ({ id }) => {
     history.push("books/new");
   };
-
-
 
   const handleDeleteBook = ({ id }) => {
     messageConfirmationDialog({
@@ -92,12 +72,10 @@ const { filter, books, filteredBooks } = booksData;
   const deleteBookElement = async (id) => {
     try {
       const response = await deleteBooks(id);
-      const data =response.data;
+      const data = response.data;
 
-      if (data!==null || data!==undefined){
-        const booksUpdated = filteredBooks?.filter(
-          (book) => book.id !== id
-        );
+      if (data !== null || data !== undefined) {
+        const booksUpdated = filteredBooks?.filter((book) => book.id !== id);
         setBooksData((bookData) => ({
           ...bookData,
           books: booksUpdated,
@@ -110,33 +88,23 @@ const { filter, books, filteredBooks } = booksData;
     }
   };
 
-
-  
- 
-
   const populateBooks = async () => {
-    try 
-    {
-     const response =await getBooks();
-     const books= response.data;
-  
-  
+    try {
+      const response = await getBooks();
+      const books = response.data;
+
       setBooksData((bookData) => ({
         ...bookData,
         books,
         filteredBooks: books,
       }));
+    } catch (error) {
+      console.error(error);
     }
-    catch (error) {
-      console.error(error)
-    }
-   
   };
   useEffect(() => {
     populateBooks();
   }, []);
-
-
 
   return (
     <>
@@ -152,17 +120,15 @@ const { filter, books, filteredBooks } = booksData;
         </Col>
 
         <Col md={12}>
-              <Row>
-                <Col md={12}>
-                  <div className="float-right mt-3 mb-3">
-                    <ButtonAdd onClick={handleAddBook} />
-                  </div>
-                </Col>
-              </Row>
+          <Row>
+            <Col md={12}>
+              <div className="float-right mt-3 mb-3">
+                <ButtonAdd onClick={handleAddBook} />
+              </div>
             </Col>
+          </Row>
+        </Col>
       </Row>
-
-      
 
       <Row>
         <Col md={12}>
@@ -178,5 +144,3 @@ const { filter, books, filteredBooks } = booksData;
 };
 
 export default BookList;
-
-
